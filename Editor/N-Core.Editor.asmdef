@@ -1,0 +1,18 @@
+{
+    "name": "N-Core.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f55c1a8f394d4d84d9807689bd76b638"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
