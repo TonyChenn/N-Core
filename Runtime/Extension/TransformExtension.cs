@@ -22,6 +22,15 @@ namespace NextFramework.Core
             trans.localPosition = pos;
             return trans;
         }
+        public static Transform SetLocalPosZ(this Transform trans, float z)
+        {
+            var pos = trans.localPosition;
+            pos.z = z;
+            trans.localPosition = pos;
+            return trans;
+        }
+        
+        
         public static Transform SetPosX(this Transform trans, float x)
         {
             var pos = trans.position;
@@ -36,6 +45,37 @@ namespace NextFramework.Core
             trans.position = pos;
             return trans;
         }
+        public static Transform SetPosZ(this Transform trans, float z)
+        {
+            var pos = trans.position;
+            pos.z = z;
+            trans.position = pos;
+            return trans;
+        }
+        
+        
+        public static Transform SetLocalScaleX(this Transform trans, float xScale)
+        {
+            Vector3 v3 = trans.localScale;
+            v3.x = xScale;
+            trans.localScale = v3;
+            return trans;
+        }
+        public static Transform SetLocalScaleY(this Transform trans, float yScale)
+        {
+            Vector3 v3 = trans.localScale;
+            v3.y = yScale;
+            trans.localScale = v3;
+            return trans;
+        }
+        public static Transform SetLocalScaleZ(this Transform trans, float zScale)
+        {
+            Vector3 v3 = trans.localScale;
+            v3.z = zScale;
+            trans.localScale = v3;
+            return trans;
+        }
+        
 
         /// <summary>
         /// 重置Trans
@@ -45,13 +85,27 @@ namespace NextFramework.Core
         {
             return trans.Identity();
         }
-
         public static Transform Identity(this Transform trans)
         {
             trans.localPosition=Vector3.zero;
             trans.localRotation=Quaternion.identity;
             trans.localScale=Vector3.one;
             return trans;
+        }
+        
+        /// <summary>
+        /// 获取Compoment,如果不存在就添加
+        /// </summary>
+        public static T GetOrAddCompoment<T>(this Transform trans) where T : Component
+        {
+            return trans.gameObject.GetOrAddCompoment<T>();
+        }
+        /// <summary>
+        /// 获取Compoment,如果不存在就添加
+        /// </summary>
+        public static Component GetOrAddCompoment(this Transform trans, Type type)
+        {
+            return trans.gameObject.GetOrAddCompoment(type);
         }
     }
 }
