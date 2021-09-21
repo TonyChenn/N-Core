@@ -14,20 +14,22 @@ namespace NextFramework.Core
         where T : NormalSingleton<T>
     {
         static object mLock = new object();
-        static T mInstance = null;
+        protected static T mInstance = null;
 
         public static T Singlton
         {
             get
             {
-                lock (mLock)
+                if (mInstance == null)
                 {
-                    if (mInstance == null)
+                    lock (mLock)
                     {
-                        mInstance = SingletonCreater.CreateSingleton<T>();
-                    }
+                        if (mInstance == null)
+                        {
+                            mInstance = SingletonCreater.CreateSingleton<T>();
+                        }
+                    } 
                 }
-
                 return mInstance;
             }
         }
@@ -128,11 +130,11 @@ namespace NextFramework.Core
 
         protected virtual void Dispose()
         {
-            _instance = null;
             Destroy(this);
+            _instance = null;
         }
 
-        private void OnDestroy()
+        protected virtual void OnDestroy()
         {
             Dispose();
         }
