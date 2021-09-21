@@ -40,6 +40,11 @@ public class BetterList<T>
         set { buffer[i] = value; }
     }
 
+    public int Count
+    {
+        get { return buffer.Length; }
+    }
+
     /// <summary>
     /// Helper function that expands the size of the array, maintaining the content.
     /// </summary>
