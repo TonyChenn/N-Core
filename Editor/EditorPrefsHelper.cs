@@ -3,7 +3,6 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Reflection;
-using NextFramework.Core;
 using Object = UnityEngine.Object;
 
 namespace SFramework.Editor
