@@ -13,7 +13,7 @@ namespace NextFramework.Core
     public abstract class NormalSingleton<T> : ISingleton
         where T : NormalSingleton<T>
     {
-        static object mLock = new object();
+        private static object mLock = new object();
         protected static T mInstance = null;
 
         public static T Singlton
