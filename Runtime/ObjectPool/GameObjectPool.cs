@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     /// <summary>
     /// GameObject对象池

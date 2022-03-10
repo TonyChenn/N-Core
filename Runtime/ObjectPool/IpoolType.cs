@@ -1,4 +1,4 @@
-﻿namespace NextFramework.Core
+﻿namespace SFramework.Core
 {
     public interface IPoolType
     {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     /// <summary>
     /// 只能用作new() 创建的类型

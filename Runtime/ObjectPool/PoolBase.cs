@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     public abstract class PoolBase<T> : IPool<T>
     {

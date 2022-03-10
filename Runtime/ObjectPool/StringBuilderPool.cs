@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     public class StringBuilderPool
     {
