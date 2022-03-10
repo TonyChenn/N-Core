@@ -2,7 +2,7 @@
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using NextFramework.Core;
+using SFramework.Core;
 using UnityEditor;
 using UnityEngine;
 
