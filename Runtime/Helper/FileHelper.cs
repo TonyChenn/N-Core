@@ -2,61 +2,64 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-public static class FileHelper
+namespace NCore
 {
-    /// <summary>
-    /// è·å–æ–‡ä»¶å¤¹ä¸­æ‰€æœ‰æ–‡ä»¶
-    /// </summary>
-    /// <param name="fileList">æ–‡ä»¶æ‰€è£…è½½çš„åˆ—è¡¨</param>
-    /// <param name="dir"></param>
-    public static void GetAllFiles(List<string> fileList, string dir)
+    public static class FileHelper
     {
-        string[] files = Directory.GetFiles(dir);
-        for (int i = 0, iMax = files.Length; i < iMax; i++)
-            fileList.Add(files[i]);
+        /// <summary>
+        /// »ñÈ¡ÎÄ¼ş¼ĞÖĞËùÓĞÎÄ¼ş
+        /// </summary>
+        /// <param name="fileList">ÎÄ¼şËù×°ÔØµÄÁĞ±í</param>
+        /// <param name="dir"></param>
+        public static void GetAllFiles(List<string> fileList, string dir)
+        {
+            string[] files = Directory.GetFiles(dir);
+            for (int i = 0, iMax = files.Length; i < iMax; i++)
+                fileList.Add(files[i]);
 
-        string[] subDirs = Directory.GetDirectories(dir);
-        for (int i = 0, iMax = subDirs.Length; i < iMax; i++)
-            GetAllFiles(fileList, subDirs[i]);
-    }
+            string[] subDirs = Directory.GetDirectories(dir);
+            for (int i = 0, iMax = subDirs.Length; i < iMax; i++)
+                GetAllFiles(fileList, subDirs[i]);
+        }
 
-    /// <summary>
-    /// åˆ é™¤æ–‡ä»¶å¤¹(åŒ…æ‹¬å­æ–‡ä»¶)
-    /// </summary>
-    /// <param name="dir"></param>
-    public static void DeleteDirectory(string dir)
-    {
-        foreach (string subdir in Directory.GetDirectories(dir))
-            Directory.Delete(subdir, true);
+        /// <summary>
+        /// É¾³ıÎÄ¼ş¼Ğ(°üÀ¨×ÓÎÄ¼ş)
+        /// </summary>
+        /// <param name="dir"></param>
+        public static void DeleteDirectory(string dir)
+        {
+            foreach (string subdir in Directory.GetDirectories(dir))
+                Directory.Delete(subdir, true);
 
-        foreach (string subFile in Directory.GetFiles(dir))
-            File.Delete(subFile);
-    }
+            foreach (string subFile in Directory.GetFiles(dir))
+                File.Delete(subFile);
+        }
 
-    /// <summary>
-    /// å°†srcæ–‡ä»¶å¤¹ä¸‹æ–‡ä»¶åŠæ–‡ä»¶å¤¹Copyåˆ°ç›®æ ‡æ–‡ä»¶å¤¹ä¸‹
-    /// </summary>
-    /// <param name="srcDir"></param>
-    /// <param name="tgtDir"></param>
-    public static void CopyDirectory(string srcDir, string tgtDir)
-    {
-        DirectoryInfo source = new DirectoryInfo(srcDir);
-        DirectoryInfo target = new DirectoryInfo(tgtDir);
+        /// <summary>
+        /// ½«srcÎÄ¼ş¼ĞÏÂÎÄ¼ş¼°ÎÄ¼ş¼ĞCopyµ½Ä¿±êÎÄ¼ş¼ĞÏÂ
+        /// </summary>
+        /// <param name="srcDir"></param>
+        /// <param name="tgtDir"></param>
+        public static void CopyDirectory(string srcDir, string tgtDir)
+        {
+            DirectoryInfo source = new DirectoryInfo(srcDir);
+            DirectoryInfo target = new DirectoryInfo(tgtDir);
 
-        if (target.FullName.StartsWith(source.FullName, StringComparison.CurrentCultureIgnoreCase))
-            throw new Exception("çˆ¶ç›®å½•ä¸èƒ½æ‹·è´åˆ°å­ç›®å½•ï¼");
+            if (target.FullName.StartsWith(source.FullName, StringComparison.CurrentCultureIgnoreCase))
+                throw new Exception("¸¸Ä¿Â¼²»ÄÜ¿½±´µ½×ÓÄ¿Â¼£¡");
 
-        if (!source.Exists) return;
+            if (!source.Exists) return;
 
-        if (!target.Exists)
-            target.Create();
+            if (!target.Exists)
+                target.Create();
 
-        FileInfo[] files = source.GetFiles();
-        for (int i = 0, iMax = files.Length; i < iMax; i++)
-            File.Copy(files[i].FullName, Path.Combine(target.FullName, files[i].Name), true);
+            FileInfo[] files = source.GetFiles();
+            for (int i = 0, iMax = files.Length; i < iMax; i++)
+                File.Copy(files[i].FullName, Path.Combine(target.FullName, files[i].Name), true);
 
-        DirectoryInfo[] dirs = source.GetDirectories();
-        for (int j = 0, jMax = dirs.Length; j < jMax; j++)
-            CopyDirectory(dirs[j].FullName, Path.Combine(target.FullName, dirs[j].Name));
+            DirectoryInfo[] dirs = source.GetDirectories();
+            for (int j = 0, jMax = dirs.Length; j < jMax; j++)
+                CopyDirectory(dirs[j].FullName, Path.Combine(target.FullName, dirs[j].Name));
+        }
     }
 }

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace SFramework.Core
+namespace NCore
 {
     public class StringBuilderPool
     {

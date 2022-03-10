@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace SFramework.Core
+namespace NCore
 {
     public static class TaskExtention
     {

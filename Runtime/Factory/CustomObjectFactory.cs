@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SFramework.Core
+namespace NCore
 {
     /// <summary>
     /// 对象是自定义生成的(如：GameObject)

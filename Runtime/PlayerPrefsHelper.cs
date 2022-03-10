@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SFramework.Core
+namespace NCore
 {
     public static class PlayerPrefsHelper
     {

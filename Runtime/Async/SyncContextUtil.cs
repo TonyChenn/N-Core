@@ -2,7 +2,7 @@
 using System.Threading;
 using UnityEngine;
 
-namespace SFramework.Core
+namespace NCore
 {
     public static class SyncContextUtil
     {

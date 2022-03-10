@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Networking;
 
-namespace SFramework.Core
+namespace NCore
 {
     public static class UnityWebRequestExtention
     {

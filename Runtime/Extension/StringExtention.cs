@@ -2,7 +2,7 @@
 using System.IO;
 using UnityEngine;
 
-namespace SFramework.Core
+namespace NCore
 {
     public static class StringExtention
     {

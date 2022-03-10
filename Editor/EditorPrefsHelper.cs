@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using Object = UnityEngine.Object;
 
-namespace SFramework.Editor
+namespace NCore.Editor
 {
     public interface IEditorPrefs
     {

@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace SFramework.Core
+namespace NCore
 {
     /// <summary>
     /// Transform 拓展方法

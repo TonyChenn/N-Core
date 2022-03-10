@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace SFramework.Core
+namespace NCore
 {
     public class ObjectFactory
     {

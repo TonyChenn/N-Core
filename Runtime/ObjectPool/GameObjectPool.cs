@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SFramework.Core
+namespace NCore
 {
     /// <summary>
     /// GameObject对象池

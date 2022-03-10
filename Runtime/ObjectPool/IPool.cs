@@ -1,4 +1,4 @@
-﻿namespace SFramework.Core
+﻿namespace NCore
 {
     public interface IPool<T>
     {

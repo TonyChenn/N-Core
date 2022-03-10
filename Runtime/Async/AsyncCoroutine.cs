@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SFramework.Core
+namespace NCore
 {
     public class AsyncCoroutine : MonoSinglton<AsyncCoroutine>, ISingleton
     {

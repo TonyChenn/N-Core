@@ -1,4 +1,4 @@
-﻿namespace SFramework.Core
+﻿namespace NCore
 {
     /// <summary>
     /// 对象是通过New()生成的

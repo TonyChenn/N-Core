@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace SFramework.Core
+namespace NCore
 {
     /// <summary>
     /// 通过反射获得无参构造函数

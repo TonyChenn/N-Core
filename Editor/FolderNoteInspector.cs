@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace SUGUI.Editor
+namespace NCore.Editor
 {
     public class Note
     {

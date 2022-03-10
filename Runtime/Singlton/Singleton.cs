@@ -3,7 +3,7 @@ using System.Reflection;
 using UnityEngine;
 using UObject = UnityEngine.Object;
 
-namespace SFramework.Core
+namespace NCore
 {
     public interface ISingleton
     {

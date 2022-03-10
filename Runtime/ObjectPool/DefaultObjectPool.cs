@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace SFramework.Core
+namespace NCore
 {
     /// <summary>
     /// 只能用作new() 创建的类型
