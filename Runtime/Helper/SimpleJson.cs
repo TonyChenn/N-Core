@@ -42,7 +42,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace SFramework.Core
+namespace NCore
 {
     public enum JSONNodeType
     {
