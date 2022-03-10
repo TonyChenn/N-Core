@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     /// <summary>
     /// 通过反射获得无参构造函数

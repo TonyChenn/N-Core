@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     public class ObjectFactory
     {

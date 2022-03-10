@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     /// <summary>
     /// 对象是自定义生成的(如：GameObject)

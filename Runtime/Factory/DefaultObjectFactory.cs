@@ -1,4 +1,4 @@
-﻿namespace NextFramework.Core
+﻿namespace SFramework.Core
 {
     /// <summary>
     /// 对象是通过New()生成的
