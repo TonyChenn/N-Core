@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Text;
-using NextFramework.Core;
+using SFramework.Core;
 using UnityEngine;
 
 // We could just add a generic GetAwaiter to YieldInstruction and CustomYieldInstruction

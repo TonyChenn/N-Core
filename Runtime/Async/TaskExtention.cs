@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     public static class TaskExtention
     {

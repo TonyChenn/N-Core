@@ -2,7 +2,7 @@
 using System.Threading;
 using UnityEngine;
 
-namespace NextFramework.Core
+namespace SFramework.Core
 {
     public static class SyncContextUtil
     {
