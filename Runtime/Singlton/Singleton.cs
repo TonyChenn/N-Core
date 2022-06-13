@@ -16,7 +16,7 @@ namespace NCore
         private static object mLock = new object();
         protected static T mInstance = null;
 
-        public static T Singlton
+        public static T Singleton
         {
             get
             {

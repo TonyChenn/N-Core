@@ -75,8 +75,13 @@ namespace NCore
             trans.localScale = v3;
             return trans;
         }
-        
 
+
+        public static Transform SetActive(this Transform trans, bool active)
+        {
+            trans.gameObject.SetActive(active);
+            return trans;
+        }
         /// <summary>
         /// 重置Trans
         /// </summary>

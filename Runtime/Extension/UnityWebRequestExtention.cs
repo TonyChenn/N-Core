@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.Networking;
 
 namespace NCore
@@ -43,6 +43,16 @@ namespace NCore
         public static byte[] GetBytes(this UnityWebRequest request)
         {
             return request.downloadHandler.data;
+        }
+
+        /// <summary>
+        /// JsonNode
+        /// </summary>
+        /// <returns></returns>
+        public static JSONNode GetJsonNode(this UnityWebRequest request)
+        {
+            string json = request.GetTxt();
+            return JSON.Parse(json);
         }
     }
 }
