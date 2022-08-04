@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace NCore.Editor
         void ReleaseEditorPrefs();
     }
 
-    public class EditorPrefsHelper : IEditorPrefs
+    public class EditorPrefsHelper
     {
         private EditorPrefsHelper(){}
 
@@ -27,6 +27,12 @@ namespace NCore.Editor
             {
                 ClearAssemblyEditorPrefs(assemblies[i]);
             }
+
+            // 自身的
+            for (int i = 0, iMax = key_obj_list.Count; i < iMax; i++)
+                EditorPrefs.DeleteKey(key_obj_list[i]);
+
+            Debug.Log("清理EditorPrefs完成");
         }
 
         /// <summary>
@@ -63,44 +69,48 @@ namespace NCore.Editor
 
 
         #region Generic Get and Set methods
-
-        // bool
-        public static bool GetBool(string prefsKey, bool defaultValue)
+        private static string getPrefsKey(string key, bool onlyProject)
         {
-            return EditorPrefs.GetBool(prefsKey, defaultValue);
+            return onlyProject ? $"{Application.dataPath}_{key}" : key;
         }
 
-        public static void SetBool(string prefsKey, bool val)
+        // bool
+        public static bool GetBool(string prefsKey, bool defaultValue, bool onlyProject = false)
         {
-            EditorPrefs.SetBool(prefsKey, val);
+            return EditorPrefs.GetBool(getPrefsKey(prefsKey,onlyProject), defaultValue);
+        }
+
+        public static void SetBool(string prefsKey, bool val, bool onlyProject = false)
+        {
+            EditorPrefs.SetBool(getPrefsKey(prefsKey, onlyProject), val);
         }
 
         // int
-        public static int GetInt(string prefsKey, int defaultValue)
+        public static int GetInt(string prefsKey, int defaultValue, bool onlyProject = false)
         {
-            return EditorPrefs.GetInt(prefsKey, defaultValue);
+            return EditorPrefs.GetInt(getPrefsKey(prefsKey, onlyProject), defaultValue);
         }
 
-        public static void SetInt(string prefsKey, int val)
+        public static void SetInt(string prefsKey, int val, bool onlyProject = false)
         {
-            EditorPrefs.SetInt(prefsKey, val);
+            EditorPrefs.SetInt(getPrefsKey(prefsKey, onlyProject), val);
         }
 
         // float
-        public static float GetFloat(string prefsKey, float defaultValue)
+        public static float GetFloat(string prefsKey, float defaultValue, bool onlyProject = false)
         {
-            return EditorPrefs.GetFloat(prefsKey, defaultValue);
+            return EditorPrefs.GetFloat(getPrefsKey(prefsKey, onlyProject), defaultValue);
         }
 
-        public static void SetFloat(string prefsKey, float val)
+        public static void SetFloat(string prefsKey, float val, bool onlyProject = false)
         {
-            EditorPrefs.SetFloat(prefsKey, val);
+            EditorPrefs.SetFloat(getPrefsKey(prefsKey, onlyProject), val);
         }
 
         // color
-        public static Color GetColor(string prefsKey, Color c)
+        public static Color GetColor(string prefsKey, Color c, bool onlyProject = false)
         {
-            string strVal = GetString(prefsKey, c.r + " " + c.g + " " + c.b + " " + c.a);
+            string strVal = GetString(getPrefsKey(prefsKey, onlyProject), c.r + " " + c.g + " " + c.b + " " + c.a);
             string[] parts = strVal.Split(' ');
 
             if (parts.Length != 4) return c;
@@ -112,15 +122,15 @@ namespace NCore.Editor
             return c;
         }
 
-        public static void SetColor(string prefsKey, Color c)
+        public static void SetColor(string prefsKey, Color c, bool onlyProject = false)
         {
-            SetString(prefsKey, c.r + " " + c.g + " " + c.b + " " + c.a);
+            SetString(getPrefsKey(prefsKey, onlyProject), c.r + " " + c.g + " " + c.b + " " + c.a);
         }
 
         // enum
-        public static T GetEnum<T>(string prefsKey, T defaultValue)
+        public static T GetEnum<T>(string prefsKey, T defaultValue, bool onlyProject = false)
         {
-            string val = GetString(prefsKey, defaultValue.ToString());
+            string val = GetString(getPrefsKey(prefsKey, onlyProject), defaultValue.ToString());
             string[] names = System.Enum.GetNames(typeof(T));
             System.Array values = System.Enum.GetValues(typeof(T));
 
@@ -133,20 +143,20 @@ namespace NCore.Editor
             return defaultValue;
         }
 
-        public static void SetEnum(string prefsKey, System.Enum val)
+        public static void SetEnum(string prefsKey, System.Enum val, bool onlyProject = false)
         {
-            SetString(prefsKey, val.ToString());
+            SetString(getPrefsKey(prefsKey, onlyProject), val.ToString());
         }
 
         // string
-        public static string GetString(string prefsKey, string defaultValue)
+        public static string GetString(string prefsKey, string defaultValue, bool onlyProject = false)
         {
-            return EditorPrefs.GetString(prefsKey, defaultValue);
+            return EditorPrefs.GetString(getPrefsKey(prefsKey, onlyProject), defaultValue);
         }
 
-        public static void SetString(string prefsKey, string val)
+        public static void SetString(string prefsKey, string val, bool onlyProject = false)
         {
-            EditorPrefs.SetString(prefsKey, val);
+            EditorPrefs.SetString(getPrefsKey(prefsKey, onlyProject), val);
         }
 
         //Object
@@ -219,24 +229,14 @@ namespace NCore.Editor
         #endregion
 
 
-        public static bool HasKey(string key)
+        public static bool HasKey(string key, bool onlyProject = false)
         {
             return EditorPrefs.HasKey(key);
         }
 
-        public static void DeleteKey(string prefsKey)
+        public static void DeleteKey(string prefsKey, bool onlyProject = false)
         {
             EditorPrefs.DeleteKey(prefsKey);
         }
-
-        #region IEditorPrefs
-
-        public void ReleaseEditorPrefs()
-        {
-            for (int i = 0, iMax = key_obj_list.Count; i < iMax; i++)
-                EditorPrefs.DeleteKey(key_obj_list[i]);
-        }
-
-        #endregion
     }
 }
