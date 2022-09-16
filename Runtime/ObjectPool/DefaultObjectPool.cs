@@ -8,24 +8,23 @@ namespace NCore
     /// <typeparam name="T"></typeparam>
     public class DefaultObjectPool<T> : PoolBase<T> where T : new()
     {
-        private Action<T> resetAction; 
-        public DefaultObjectPool(Action<T> resetAction, int initCount = 0)
+        private readonly Action<T> resetAction;
+
+
+        public DefaultObjectPool(Action<T> resetAction, int initCount = 0) : base(initCount)
         {
-            factory = new DefaultObjectFactory<T>();
             this.resetAction = resetAction;
-            if (initCount > 0)
-            {
-                for (int i = 0; i < initCount; i++)
-                {
-                    Recycle(factory.Create());
-                }
-            }
+        }
+
+        public override T Create()
+        {
+            return new T();
         }
 
         public override bool Recycle(T obj)
         {
             if (obj == null) return false;
-            
+
             resetAction?.Invoke(obj);
             dataStack.Push(obj);
             return true;

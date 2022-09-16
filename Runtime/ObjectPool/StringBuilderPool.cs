@@ -6,13 +6,9 @@ namespace NCore
 {
     public class StringBuilderPool
     {
-        private static int MaxCount = 20;
-        static Stack<StringBuilder> dataStack = new Stack<StringBuilder>();
+        private static int MaxCount = 31;
+        static Stack<StringBuilder> dataStack = new Stack<StringBuilder>(16);
 
-        public static void SetMaxCount()
-        {
-            
-        }
         public static StringBuilder Alloc()
         {
             return dataStack.Count > 0 ? dataStack.Pop() : new StringBuilder();
