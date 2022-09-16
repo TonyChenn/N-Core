@@ -4,7 +4,7 @@ namespace NCore
 {
     public abstract class PoolBase<T> : IPool<T>
     {
-        protected readonly Stack<T> dataStack = new Stack<T>();
+        protected Stack<T> dataStack;
         protected int maxCount = 10;
 
         public int HasCount { get { return dataStack.Count; } }
@@ -27,6 +27,8 @@ namespace NCore
         public abstract bool Recycle(T obj);
 
         public abstract T Create();
+
+        public abstract void Destory();
     }
 }
 

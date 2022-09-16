@@ -29,5 +29,10 @@ namespace NCore
             dataStack.Push(obj);
             return true;
         }
+
+        public override void Destory()
+        {
+            dataStack = null;
+        }
     }
 }

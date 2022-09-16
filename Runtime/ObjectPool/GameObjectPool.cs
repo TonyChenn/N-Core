@@ -7,7 +7,7 @@ namespace NCore
     /// GameObject对象池
     /// </summary>
 
-    internal class GameObjectPool<T> : PoolBase<T>
+    internal class GameObjectPool<T> : PoolBase<T> where T: Component
     {
         private readonly Action<T> resetAction;
         private readonly Func<T> createFunc;
@@ -32,6 +32,18 @@ namespace NCore
             dataStack.Push(obj);
 
             return true;
+        }
+
+
+        public override void Destory()
+        {
+            while (dataStack.Count > 0)
+            {
+                T obj = dataStack.Pop();
+                GameObject.Destroy(obj as GameObject);
+            }
+
+            dataStack = null;
         }
     }
 }
