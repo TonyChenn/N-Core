@@ -1,4 +1,4 @@
-using System;
+ï»¿using System;
 using System.Collections.Generic;
 using System.IO;
 
@@ -7,9 +7,9 @@ namespace NCore
     public static class FileHelper
     {
         /// <summary>
-        /// »ñÈ¡ÎÄ¼ş¼ĞÖĞËùÓĞÎÄ¼ş
+        /// è·å–æ–‡ä»¶å¤¹ä¸­æ‰€æœ‰æ–‡ä»¶
         /// </summary>
-        /// <param name="fileList">ÎÄ¼şËù×°ÔØµÄÁĞ±í</param>
+        /// <param name="fileList">æ–‡ä»¶æ‰€è£…è½½çš„åˆ—è¡¨</param>
         /// <param name="dir"></param>
         public static void GetAllFiles(List<string> fileList, string dir)
         {
@@ -23,7 +23,7 @@ namespace NCore
         }
 
         /// <summary>
-        /// É¾³ıÎÄ¼ş¼Ğ(°üÀ¨×ÓÎÄ¼ş)
+        /// åˆ é™¤æ–‡ä»¶å¤¹(åŒ…æ‹¬å­æ–‡ä»¶)
         /// </summary>
         /// <param name="dir"></param>
         public static void DeleteDirectory(string dir)
@@ -36,7 +36,7 @@ namespace NCore
         }
 
         /// <summary>
-        /// ½«srcÎÄ¼ş¼ĞÏÂÎÄ¼ş¼°ÎÄ¼ş¼ĞCopyµ½Ä¿±êÎÄ¼ş¼ĞÏÂ
+        /// å°†srcæ–‡ä»¶å¤¹ä¸‹æ–‡ä»¶åŠæ–‡ä»¶å¤¹Copyåˆ°ç›®æ ‡æ–‡ä»¶å¤¹ä¸‹
         /// </summary>
         /// <param name="srcDir"></param>
         /// <param name="tgtDir"></param>
@@ -46,7 +46,7 @@ namespace NCore
             DirectoryInfo target = new DirectoryInfo(tgtDir);
 
             if (target.FullName.StartsWith(source.FullName, StringComparison.CurrentCultureIgnoreCase))
-                throw new Exception("¸¸Ä¿Â¼²»ÄÜ¿½±´µ½×ÓÄ¿Â¼£¡");
+                throw new Exception("çˆ¶ç›®å½•ä¸èƒ½æ‹·è´åˆ°å­ç›®å½•ï¼");
 
             if (!source.Exists) return;
 
