@@ -18,5 +18,10 @@ namespace NCore
 
             return constructor.Invoke(null) as T;
         }
+
+        public void Reset(T item)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

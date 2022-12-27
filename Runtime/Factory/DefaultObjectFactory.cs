@@ -13,6 +13,11 @@
         {
             return new T();
         }
+
+        public void Reset(T item)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
 
