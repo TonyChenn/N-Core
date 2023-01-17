@@ -16,7 +16,7 @@ namespace NCore
         /// <summary>
         /// AssetBundle
         /// </summary>
-        public static AssetBundle GetBundle(this UnityWebRequest request)
+        public static AssetBundle GetAssetBundle(this UnityWebRequest request)
         {
             return DownloadHandlerAssetBundle.GetContent(request);
         }
@@ -24,7 +24,7 @@ namespace NCore
         /// <summary>
         /// AudioClip
         /// </summary>
-        public static AudioClip GetClip(this UnityWebRequest request)
+        public static AudioClip GetAudioClip(this UnityWebRequest request)
         {
             return DownloadHandlerAudioClip.GetContent(request);
         }
