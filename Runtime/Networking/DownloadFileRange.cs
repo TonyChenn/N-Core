@@ -39,7 +39,8 @@ namespace NCore
             m_LocalFileSize = (ulong)m_Fs.Length;
             m_CurFileSize = m_LocalFileSize;
 
-            //“bytes =< range - start > -”请求从range - start到文件结尾的所有bytes
+            // "bytes =< range - start > -" 请求从range - start到文件结尾的所有bytes
+            //  https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Headers/Range
             request.SetRequestHeader("Range", "bytes=" + m_LocalFileSize + "-");
         }
         public new void Dispose()
@@ -77,7 +78,7 @@ namespace NCore
             }
             m_Fs.Write(data, 0, dataLength);
             m_CurFileSize += (ulong)dataLength;
-            if (UnityEngine.Time.time - m_LastTime >= 1.0f)
+            if (UnityEngine.Time.time - m_LastTime >= 0.5f)
             {
                 m_DownloadSpeed = (m_CurFileSize - m_LastSize) / (UnityEngine.Time.time - m_LastTime);
                 m_LastTime = UnityEngine.Time.time;
@@ -112,6 +113,10 @@ namespace NCore
 
             StartDownloadEvent?.Invoke();
         }
+        
+        /// <summary>
+        /// 下载完成
+        /// </summary>
         protected override void CompleteContent()
         {
             base.CompleteContent();
