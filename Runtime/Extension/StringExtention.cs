@@ -6,6 +6,27 @@ namespace NCore
 {
     public static class StringExtention
     {
+        #region 字符串相关
+        public static bool IsNullOrEmpty(this string str)
+        {
+            return string.IsNullOrEmpty(str);
+        }
+
+        public static int ToInt(this string str, int defaultValue = 0)
+        {
+            var result = defaultValue;
+            int.TryParse(str, out result);
+            return result;
+        }
+
+        public static DateTime ToDateTime(this string str, DateTime defaultValue = default)
+        {
+            var result = defaultValue;
+            DateTime.TryParse(str, out result);
+            return result;
+        }
+
+        #endregion
         #region 路径相关
 
         /// <summary>

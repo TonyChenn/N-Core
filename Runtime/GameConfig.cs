@@ -21,6 +21,7 @@ namespace NCore
         public void InitSingleton()
         {
             gameObject.name = "[GameConfig]";
+            DontDestroyOnLoad(gameObject);
         }
 
         public static GameConfig Singleton
