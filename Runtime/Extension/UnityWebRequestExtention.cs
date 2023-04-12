@@ -20,7 +20,7 @@ namespace NCore
         {
             return DownloadHandlerAssetBundle.GetContent(request);
         }
-        
+
         /// <summary>
         /// AudioClip
         /// </summary>
@@ -28,7 +28,7 @@ namespace NCore
         {
             return DownloadHandlerAudioClip.GetContent(request);
         }
-        
+
         /// <summary>
         /// Texture
         /// </summary>
@@ -53,6 +53,32 @@ namespace NCore
         {
             string json = request.GetTxt();
             return JSON.Parse(json);
+        }
+
+        /// <summary>
+        /// 把下载的文件保存到本地
+        /// </summary>
+        /// <param name="request"></param>
+        /// <param name="path"></param>
+        public static void SaveFile(this UnityWebRequest request, string path)
+        {
+            using (System.IO.MemoryStream memory = new System.IO.MemoryStream(request.GetBytes()))
+            {
+                if (System.IO.File.Exists(path))
+                    System.IO.File.Delete(path);
+
+                var folder = System.IO.Path.GetDirectoryName(path);
+                if (!System.IO.Directory.Exists(folder)) { System.IO.Directory.CreateDirectory(folder); }
+
+                byte[] buffer = new byte[1024 * 1024];
+                System.IO.FileStream fs = System.IO.File.Open(path, System.IO.FileMode.OpenOrCreate);
+                int readBytes;
+                while ((readBytes = memory.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    fs.Write(buffer, 0, readBytes);
+                }
+                fs.Close();
+            }
         }
     }
 }

@@ -5,16 +5,16 @@ namespace NCore
     public class Downloader:NormalSingleton<Downloader>
     {
         public static int MaxRetryCount = 3;
-        public static int MaxDownloadThreadsCount = 10;
-        public static int MaxDecompressThreadsCount = 10;
+        public static int MaxDownloadThreadsCount = 5;
+        public static int MaxDecompressThreadsCount = 5;
         public static int TimeOut = 30;
-
 
         // 下载作业队列
         private Queue<BundleUnit> queue = new Queue<BundleUnit>(32);
         private List<BundleUnit> completeList = new List<BundleUnit>(32);
         private List<BundleUnit> errorList = new List<BundleUnit>(8);
 
+        private Downloader() { }
 
         public void AddDownLoad(BundleUnit item)
         {
