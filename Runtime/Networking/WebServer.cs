@@ -1,3 +1,4 @@
+using NDebug;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -23,7 +24,9 @@ namespace NCore
             //    url = ChannelConfig.Singleton.CurChannel.ServerURL + url;
 
             UnityWebRequest request = UnityWebRequest.Get(url);
+            Log.Info("开始下载：" + url);
             await request.SendWebRequest();
+            Log.Info("开始完成：" + url);
             if (request.result != UnityWebRequest.Result.Success)
                 Debug.LogError($"[WebServer] fail to get ---- {url}");
 

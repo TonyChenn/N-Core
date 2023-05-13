@@ -7,7 +7,7 @@ namespace NCore
         protected Stack<T> dataStack;
         protected int maxCount = 10;
 
-        public int HasCount { get { return dataStack.Count; } }
+        public int Count { get { return dataStack.Count; } }
 
         public PoolBase(int initCount = 4)
         {
@@ -19,7 +19,7 @@ namespace NCore
         /// </summary>
         public virtual T Alloc()
         {
-            return HasCount == 0 ? Create() : dataStack.Pop();
+            return Count == 0 ? Create() : dataStack.Pop();
         }
         /// <summary>
         /// 回收
