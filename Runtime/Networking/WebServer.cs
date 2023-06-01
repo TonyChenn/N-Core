@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Networking;
 
-namespace NCore
+namespace NCore.Networking
 {
     /// <summary>
     /// 用作http请求,小文件下载
@@ -24,9 +24,9 @@ namespace NCore
             //    url = ChannelConfig.Singleton.CurChannel.ServerURL + url;
 
             UnityWebRequest request = UnityWebRequest.Get(url);
-            Log.Info("开始下载：" + url);
+            Log.Info("版控开始下载：" + url);
             await request.SendWebRequest();
-            Log.Info("开始完成：" + url);
+            Log.Info("版控下载完成：" + url);
             if (request.result != UnityWebRequest.Result.Success)
                 Debug.LogError($"[WebServer] fail to get ---- {url}");
 

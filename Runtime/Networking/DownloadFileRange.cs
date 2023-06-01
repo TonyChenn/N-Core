@@ -1,12 +1,14 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine.Networking;
 
-namespace NCore
+namespace NCore.Networking
 {
     /// <summary>
     /// Unity2018+
     /// 断点续传下载(用于大文件下载)
     /// </summary>
+    [Obsolete("UnityWebRequest为协程实现，请使用 DownloadFile 代替")]
     public class DownloadFileRange : DownloadHandlerScript
     {
         private ulong m_TotalFileSize = 0;               // 文件总大小

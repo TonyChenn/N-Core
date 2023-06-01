@@ -1,45 +1,567 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
+using System.Threading;
+using NDebug;
+using UnityEngine;
 
-namespace NCore
+namespace NCore.Networking
 {
-    public class Downloader:NormalSingleton<Downloader>
+    public class Downloader : MonoBehaviour
     {
-        public static int MaxRetryCount = 3;
-        public static int MaxDownloadThreadsCount = 5;
-        public static int MaxDecompressThreadsCount = 5;
+        private static object _lock = new object();     // 线程锁
+        public static int MaxRetryCount = 3;            // 最大尝试次数
+        public static int MaxThreadsCount = 10;         // 同时最大下载量
         public static int TimeOut = 30;
 
-        // 下载作业队列
-        private Queue<BundleUnit> queue = new Queue<BundleUnit>(32);
-        private List<BundleUnit> completeList = new List<BundleUnit>(32);
-        private List<BundleUnit> errorList = new List<BundleUnit>(8);
+        private Queue<DownloadFileMac> downloadQueue;   // 下载作业队列
+        private List<DownloadUnit> completeList;        // 下载完成列表
+        private List<DownloadFileMac> errorList;        // 下载失败列表
 
-        private Downloader() { }
+        private Dictionary<Thread, DownloadFileMac> threadDict;
 
-        public void AddDownLoad(BundleUnit item)
+        private static Downloader _instance = null;
+        public static Downloader Singleton { get { return _instance; } }
+
+        private void Awake()
         {
-            if (item == null) return;
-
-            queue.Enqueue(item);
+            _instance = this;
+            // https证书相关
+            System.Net.ServicePointManager.DefaultConnectionLimit = 100;
+            System.Net.ServicePointManager.ServerCertificateValidationCallback = RemoteCertificateValidationCallback;
+        }
+        private void Start()
+        {
+            downloadQueue = new Queue<DownloadFileMac>(8);
+            completeList = new List<DownloadUnit>(16);
+            errorList = new List<DownloadFileMac>();
+            threadDict = new Dictionary<Thread, DownloadFileMac>(MaxThreadsCount);
         }
 
+        private void Update()
+        {
+            UpdateComplete();
+            UpdateProgress();
+            UpdateError();
+            UpdateThread();
+        }
+
+
+
+        public bool DownloadSync(DownloadUnit unit)
+        {
+            if (unit == null) return false;
+
+            var mac = new DownloadFileMac(unit);
+            try
+            {
+                //同步下载尝试三次
+                while (mac.TryCount <= MaxRetryCount)
+                {
+                    mac.Run();
+                    if (mac.State == DownloadFileState.Complete)
+                        return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.Log("Error DownloadSync " + mac.State + " " + mac.Unit.Name + " " + ex.Message + " " + ex.StackTrace);
+            }
+
+            return false;
+        }
+        public void DownLoadAsync(DownloadUnit unit)
+        {
+            if (unit == null) return;
+
+            var downloadItem = new DownloadFileMac(unit);
+            lock (_lock)
+            {
+                downloadQueue.Enqueue(downloadItem);
+            }
+            if (threadDict.Count < MaxThreadsCount)
+            {
+                Thread thread = new Thread(DownloadThreadLoop);
+                lock (_lock)
+                {
+                    threadDict.Add(thread, null);
+                }
+                thread.Start();
+            }
+        }
+        /// <summary>
+        /// 添加下载任务
+        /// </summary>
+        public void AddDownload(DownloadUnit downloadUnit)
+        {
+            if (downloadUnit == null) return;
+
+            var mac = new DownloadFileMac(downloadUnit);
+            lock (_lock)
+            {
+                downloadQueue.Enqueue(mac);
+            }
+        }
+
+        // 停止下载的Unit
+        public void DeleteDownload(DownloadUnit unit)
+        {
+            lock (_lock)
+            {
+                unit.IsDelete = true;
+            }
+        }
+        //清理所有下载
+        public void ClearAllDownload()
+        {
+            lock (_lock)
+            {
+                foreach (var item in downloadQueue)
+                {
+                    if (item != null)
+                        item.Unit.IsDelete = true;
+                }
+
+                foreach (var item in threadDict)
+                {
+                    if (item.Value != null)
+                    {
+                        item.Value.Unit.IsDelete = true;
+                    }
+                }
+
+                for (int i = 0, iMax = completeList.Count; i < iMax; i++)
+                {
+                    if (completeList[i] != null)
+                    {
+                        completeList[i].IsDelete = true;
+                    }
+                }
+            }
+        }
+
+        private void DownloadThreadLoop()
+        {
+            while (true)
+            {
+                DownloadFileMac downloadItem = null;
+                lock (_lock)
+                {
+                    if (downloadQueue.Count > 0)
+                    {
+                        downloadItem = downloadQueue.Dequeue();
+                        threadDict[Thread.CurrentThread] = downloadItem;
+
+                        // 下载取消
+                        if (downloadItem != null && downloadItem.Unit.IsDelete)
+                        {
+                            threadDict[Thread.CurrentThread] = null;
+                            continue;
+                        }
+                    }
+                }
+                // 无下载任务，结束
+                if (downloadItem == null) break;
+
+                downloadItem.Run();
+
+                if (downloadItem.State == DownloadFileState.Complete)
+                {
+                    lock (_lock)
+                    {
+                        completeList.Add(downloadItem.Unit);
+                        threadDict[Thread.CurrentThread] = null;
+                    }
+                }
+                else if (downloadItem.State == DownloadFileState.Error)
+                {
+                    lock (_lock)
+                    {
+                        downloadQueue.Enqueue(downloadItem);
+                        if (downloadItem.NeedShowError())
+                            errorList.Add(downloadItem);
+                    }
+                    break;
+                }
+                else
+                {
+                    Log.Error($"Downloader: Download error State: {downloadItem.State}\t {downloadItem.Unit.Name}");
+                    break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 更新线程状态
+        /// </summary>
+        private void UpdateThread()
+        {
+            if (downloadQueue.Count == 0 || threadDict.Count == 0) return;
+
+            lock (_lock)
+            {
+                List<Thread> list = new List<Thread>();
+                foreach (var item in threadDict)
+                {
+                    if (item.Key.IsAlive) continue;
+                    if (item.Value != null)
+                        downloadQueue.Enqueue(item.Value);
+
+                    list.Add(item.Key);
+                }
+
+                for (int i = 0, iMax = list.Count; i < iMax; i++)
+                {
+                    threadDict.Remove(list[i]);
+                    list[i].Abort();
+                }
+            }
+            //如果没有网络，不开启新线程，旧线程会逐个关闭
+            if (!HasNetwork()) return;
+            if (threadDict.Count >= MaxThreadsCount) return;
+
+            if (downloadQueue.Count > 0)
+            {
+                var thread = new Thread(DownloadThreadLoop);
+                lock (_lock)
+                {
+                    threadDict[thread] = null;
+                }
+                thread.Start();
+            }
+
+        }
+
+        private void UpdateComplete()
+        {//回调完成
+            if (completeList.Count == 0) return;
+
+            DownloadUnit[] completeArr = null;
+            lock (_lock)
+            {
+                completeArr = completeList.ToArray();
+                completeList.Clear();
+            }
+
+            foreach (var info in completeArr)
+            {
+                if (info.IsDelete) continue; //已经销毁，不进行回调
+                info.IsDelete = true;
+
+                info.ProgressFun?.Invoke(info.Size, info.Size);
+                info.CompleteFun?.Invoke();
+            }
+
+        }
+
+        private void UpdateProgress()
+        {
+            //回调进度
+            if (threadDict.Count == 0) return;
+
+            List<DownloadFileMac> runArr = new List<DownloadFileMac>();
+            lock (_lock)
+            {
+                foreach (var mac in threadDict.Values)
+                {
+                    if (mac != null) runArr.Add(mac);
+                }
+            }
+
+            foreach (var mac in runArr)
+            {
+                var info = mac.Unit;
+                if (info.IsDelete) continue; //已经销毁，不进行回调
+
+                info.ProgressFun?.Invoke(mac.CurSize, mac.TotalSize);
+            }
+        }
+        private void UpdateError()
+        {
+            //回调error
+            if (errorList.Count == 0) return;
+
+            DownloadFileMac[] errorArr = null;
+            lock (_lock)
+            {
+                errorArr = errorList.ToArray();
+                errorList.Clear();
+            }
+
+            foreach (var mac in errorArr)
+            {
+                var info = mac.Unit;
+                if (info.IsDelete) continue; //已经销毁，不进行回调
+
+                info.ErrorFun?.Invoke(mac.Error);
+                mac.Error = "";
+            }
+        }
+
+        /// <summary>
+        /// 是否有网络连接
+        /// </summary>
+        private bool HasNetwork()
+        {
+            return (Application.internetReachability == NetworkReachability.ReachableViaCarrierDataNetwork ||       // 2/3/4G
+                    Application.internetReachability == NetworkReachability.ReachableViaLocalAreaNetwork);          // wifi
+        }
+
+        #region https 证书异常、https连接数量
+        private bool RemoteCertificateValidationCallback(System.Object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            bool isOk = true;
+            // If there are errors in the certificate chain, look at each error to determine the cause.
+            if (sslPolicyErrors != SslPolicyErrors.None)
+            {
+                for (int i = 0; i < chain.ChainStatus.Length; i++)
+                {
+                    if (chain.ChainStatus[i].Status != X509ChainStatusFlags.RevocationStatusUnknown)
+                    {
+                        chain.ChainPolicy.RevocationFlag = X509RevocationFlag.EntireChain;
+                        chain.ChainPolicy.RevocationMode = X509RevocationMode.Online;
+                        chain.ChainPolicy.UrlRetrievalTimeout = new TimeSpan(0, 1, 0);
+                        chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllFlags;
+                        bool chainIsValid = chain.Build((X509Certificate2)certificate);
+                        if (!chainIsValid)
+                        {
+                            isOk = false;
+                        }
+                    }
+                }
+            }
+            return isOk;
+        }
+        #endregion
     }
 
-
-    enum DownLoadState
+    internal class DownloadFileMac
     {
-        Checking,               // 检查是否有更新
-        CheckSucceed,           // 检查完毕
-        CheckFailed,            // 检查失败
+        const int SectionSize = 16 * 1024;          // 下载每一份大小：16KB
+        const int TimeOut = 5 * 1000;               // 5秒
+        const int ReadWriteTimeout = 2 * 1000;      // 2秒
 
-        Downloading,            // 下载中
-        DownloadFailed,         // 下载失败
-        DownloadSucceed,        // 所有文件下载完成
-        WriteFileFailed,        // 写文件失败
+        public DownloadUnit Unit;
 
-        Decompressing,          // 解压中
-        DecompressFinished,     // 解压完成
+        public ulong CurSize = 0;
+        public ulong TotalSize = 0;
+        public DownloadFileState State = DownloadFileState.None;
+        public int TryCount = 0;
+        public string Error;
 
-        Retry,                  // 重新连接中
+        public DownloadFileMac(DownloadUnit downloadUnit)
+        {
+            Unit = downloadUnit;
+        }
+
+        public bool NeedShowError()
+        {
+            return TryCount == 3 || TryCount == 6 || TryCount == 10;
+        }
+
+        public void Run()
+        {
+            ++TryCount;
+            State = DownloadFileState.ResetSize;
+            if (!ResetSize()) return;
+
+            State = DownloadFileState.Download;
+            if (!Download()) return;
+
+            State = DownloadFileState.Md5;
+            if (!CheckMD5()) //校验失败，重下一次
+            {
+                State = DownloadFileState.Download;
+                if (!Download()) return;
+
+                State = DownloadFileState.Md5;
+                if (!CheckMD5()) return; //两次都失败，文件有问题
+            }
+
+            State = DownloadFileState.Complete;
+        }
+
+        // 断点续传文件下载
+        public bool Download()
+        {
+            if (File.Exists(Unit.SavePath))
+            {
+                CurSize = Unit.Size;
+                return true;
+            }
+
+            long startPos = 0;
+            string tmpFile = $"{Unit.SavePath}.tmp";
+            FileStream fs = null;
+            if (File.Exists(tmpFile))
+            {
+                fs = File.OpenWrite(tmpFile);
+                startPos = fs.Length;
+                fs.Seek(startPos, SeekOrigin.Current);
+
+                if (startPos == (long)Unit.Size)
+                {
+                    fs.Flush(); fs.Close(); fs = null;
+                    if (File.Exists(Unit.SavePath))
+                        File.Delete(Unit.SavePath);
+
+                    File.Move(tmpFile, Unit.SavePath);
+
+                    CurSize = (ulong)startPos;
+                    return true;
+                }
+            }
+            else
+            {
+                string folder = Path.GetDirectoryName(tmpFile);
+                if (!Directory.Exists(folder))
+                    Directory.CreateDirectory(folder);
+
+                fs = new FileStream(tmpFile, FileMode.Create);
+            }
+            HttpWebRequest request = null;
+            HttpWebResponse response = null;
+            Stream stream = null;
+            try
+            {
+                request = WebRequest.Create(Unit.DownloadUrl) as HttpWebRequest;
+                request.ReadWriteTimeout = ReadWriteTimeout;
+                request.Timeout = TimeOut;
+                if (startPos > 0) request.AddRange(startPos);
+
+                response = (HttpWebResponse)request.GetResponse();
+                stream = response.GetResponseStream();
+                stream.ReadTimeout = TimeOut;
+
+                long totalSize = response.ContentLength;
+                long curSize = startPos;
+                if (curSize == totalSize)
+                {
+                    fs.Flush(); fs.Close(); fs = null;
+                    if (File.Exists(Unit.SavePath))
+                        File.Delete(Unit.SavePath);
+
+                    File.Move(tmpFile, Unit.SavePath);
+                    CurSize = (ulong)curSize;
+                }
+                else
+                {
+                    byte[] bytes = new byte[SectionSize];
+                    int readSize = stream.Read(bytes, 0, SectionSize);
+                    while (readSize > 0)
+                    {
+                        fs.Write(bytes, 0, readSize);
+                        curSize += readSize;
+
+                        if (curSize == totalSize)
+                        {
+                            fs?.Flush(); fs?.Close(); fs = null;
+
+                            if (File.Exists(Unit.SavePath))
+                                File.Delete(Unit.SavePath);
+
+                            File.Move(tmpFile, Unit.SavePath);
+                        }
+                        CurSize = (ulong)curSize;
+                        readSize = stream.Read(bytes, 0, SectionSize);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                fs?.Flush(); fs?.Close(); fs = null;
+
+                if (File.Exists(tmpFile))
+                    File.Delete(tmpFile);
+
+                if (File.Exists(Unit.SavePath))
+                    File.Delete(Unit.SavePath);
+
+                State = DownloadFileState.Error;
+                Error = $"Download Error: {ex.Message}";
+            }
+            finally
+            {
+                fs?.Flush(); fs?.Close(); fs = null;
+                request?.Abort(); request = null;
+                response?.Close(); response = null;
+            }
+
+            return State != DownloadFileState.Error;
+        }
+
+        /// <summary>
+        /// 获取远程文件大小
+        /// </summary>
+        private uint GetRemoteFileSize(string url)
+        {
+            HttpWebRequest request = null;
+            WebResponse response = null;
+            uint length = 0;
+            try
+            {
+                request = WebRequest.Create(url) as HttpWebRequest;
+                request.Timeout = TimeOut;
+                request.ReadWriteTimeout = ReadWriteTimeout;
+                request.Method = "HEAD";
+                response = request.GetResponse();
+                length = (uint)response.ContentLength;
+            }
+            catch (Exception ex)
+            {
+                State = DownloadFileState.Error;
+                Error = "Request Remote File Size Error: " + ex.Message;
+            }
+            finally
+            {
+                request?.Abort();
+                response?.Close();
+                request = null;
+                response = null;
+            }
+            return length;
+        }
+
+        private bool CheckMD5()
+        {
+            if (string.IsNullOrEmpty(Unit.MD5)) return true;
+
+            string realMD5 = MD5Helper.GetFileMD5(Unit.SavePath);
+            if (realMD5 != Unit.MD5)
+            {
+                System.IO.File.Delete(Unit.SavePath);
+                State = DownloadFileState.Error;
+                Error = $"Check File MD5 Error: {Unit.Name}";
+                return false;
+            }
+            return true;
+        }
+
+        private bool ResetSize()
+        {
+            if (Unit.Size <= 0)
+            {
+                Unit.Size = GetRemoteFileSize(Unit.DownloadUrl);
+                if (Unit.Size == 0) return false;
+            }
+
+            CurSize = 0;
+            TotalSize = Unit.Size;
+
+            return true;
+        }
+    }
+
+    internal enum DownloadFileState
+    {
+        None,
+        ResetSize,
+        Download,
+        Md5,
+        Complete,
+        Error,
     }
 }
