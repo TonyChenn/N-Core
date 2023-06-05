@@ -61,6 +61,7 @@ namespace NCore.Networking
                 //同步下载尝试三次
                 while (mac.TryCount <= MaxRetryCount)
                 {
+                    Log.Info($"[Downloader] :{unit.Name}\t{mac.TryCount}");
                     mac.Run();
                     if (mac.State == DownloadFileState.Complete)
                         return true;
@@ -147,16 +148,16 @@ namespace NCore.Networking
         {
             while (true)
             {
-                DownloadFileMac downloadItem = null;
+                DownloadFileMac mac = null;
                 lock (_lock)
                 {
                     if (downloadQueue.Count > 0)
                     {
-                        downloadItem = downloadQueue.Dequeue();
-                        threadDict[Thread.CurrentThread] = downloadItem;
+                        mac = downloadQueue.Dequeue();
+                        threadDict[Thread.CurrentThread] = mac;
 
                         // 下载取消
-                        if (downloadItem != null && downloadItem.Unit.IsDelete)
+                        if (mac != null && mac.Unit.IsDelete)
                         {
                             threadDict[Thread.CurrentThread] = null;
                             continue;
@@ -164,31 +165,31 @@ namespace NCore.Networking
                     }
                 }
                 // 无下载任务，结束
-                if (downloadItem == null) break;
+                if (mac == null) break;
 
-                downloadItem.Run();
+                mac.Run();
 
-                if (downloadItem.State == DownloadFileState.Complete)
+                if (mac.State == DownloadFileState.Complete)
                 {
                     lock (_lock)
                     {
-                        completeList.Add(downloadItem.Unit);
+                        completeList.Add(mac.Unit);
                         threadDict[Thread.CurrentThread] = null;
                     }
                 }
-                else if (downloadItem.State == DownloadFileState.Error)
+                else if (mac.State == DownloadFileState.Error)
                 {
                     lock (_lock)
                     {
-                        downloadQueue.Enqueue(downloadItem);
-                        if (downloadItem.NeedShowError())
-                            errorList.Add(downloadItem);
+                        downloadQueue.Enqueue(mac);
+                        if (mac.NeedShowError())
+                            errorList.Add(mac);
                     }
                     break;
                 }
                 else
                 {
-                    Log.Error($"Downloader: Download error State: {downloadItem.State}\t {downloadItem.Unit.Name}");
+                    Log.Error($"Downloader: Download error State: {mac.State}\t\t{mac.Unit.Name}\t\t{mac.TryCount}");
                     break;
                 }
             }
@@ -359,11 +360,12 @@ namespace NCore.Networking
 
         public bool NeedShowError()
         {
-            return TryCount == 3 || TryCount == 6 || TryCount == 10;
+            return TryCount >= Downloader.MaxRetryCount;
         }
 
-        public void Run()
+        public async void Run()
         {
+
             ++TryCount;
             State = DownloadFileState.ResetSize;
             if (!ResetSize()) return;
@@ -372,39 +374,41 @@ namespace NCore.Networking
             if (!Download()) return;
 
             State = DownloadFileState.Md5;
-            if (!CheckMD5()) //校验失败，重下一次
+            if (CheckMD5()) //校验失败，重下一次
             {
-                State = DownloadFileState.Download;
-                if (!Download()) return;
-
-                State = DownloadFileState.Md5;
-                if (!CheckMD5()) return; //两次都失败，文件有问题
+                State = DownloadFileState.Complete;
             }
+            else
+            {
+                //State = DownloadFileState.Download;
+                //if (!Download()) return;
 
-            State = DownloadFileState.Complete;
+                //State = DownloadFileState.Md5;
+                //if (!CheckMD5()) return; //两次都失败，文件有问题
+            }
+            await System.Threading.Tasks.Task.Delay(100);
         }
 
         // 断点续传文件下载
         public bool Download()
         {
+            long startPos = 0;
+            string tmpFile = $"{Unit.SavePath}.tmp";
+            FileStream fs = null;
             if (File.Exists(Unit.SavePath))
             {
                 CurSize = Unit.Size;
                 return true;
             }
-
-            long startPos = 0;
-            string tmpFile = $"{Unit.SavePath}.tmp";
-            FileStream fs = null;
-            if (File.Exists(tmpFile))
+            else if (File.Exists(tmpFile))
             {
                 fs = File.OpenWrite(tmpFile);
                 startPos = fs.Length;
                 fs.Seek(startPos, SeekOrigin.Current);
-
-                if (startPos == (long)Unit.Size)
+                //文件已经下载完，没改名字，结束
+                if ((ulong)startPos == Unit.Size)
                 {
-                    fs.Flush(); fs.Close(); fs = null;
+                    fs?.Flush(); fs?.Dispose();
                     if (File.Exists(Unit.SavePath))
                         File.Delete(Unit.SavePath);
 
@@ -440,7 +444,7 @@ namespace NCore.Networking
                 long curSize = startPos;
                 if (curSize == totalSize)
                 {
-                    fs.Flush(); fs.Close(); fs = null;
+                    fs.Flush(); fs.Dispose();
                     if (File.Exists(Unit.SavePath))
                         File.Delete(Unit.SavePath);
 
@@ -456,9 +460,12 @@ namespace NCore.Networking
                         fs.Write(bytes, 0, readSize);
                         curSize += readSize;
 
+                        // 判断是否下载完成
+                        // 下载完成将temp文件，改成正式文件
                         if (curSize == totalSize)
                         {
-                            fs?.Flush(); fs?.Close(); fs = null;
+                            fs?.Flush();
+                            fs?.Dispose();
 
                             if (File.Exists(Unit.SavePath))
                                 File.Delete(Unit.SavePath);
@@ -472,7 +479,7 @@ namespace NCore.Networking
             }
             catch (Exception ex)
             {
-                fs?.Flush(); fs?.Close(); fs = null;
+                fs?.Flush(); fs?.Dispose();
 
                 if (File.Exists(tmpFile))
                     File.Delete(tmpFile);
@@ -485,7 +492,11 @@ namespace NCore.Networking
             }
             finally
             {
-                fs?.Flush(); fs?.Close(); fs = null;
+                if (fs != null)
+                {
+                    fs.Dispose();
+                }
+                stream?.Close(); stream = null;
                 request?.Abort(); request = null;
                 response?.Close(); response = null;
             }
@@ -496,19 +507,18 @@ namespace NCore.Networking
         /// <summary>
         /// 获取远程文件大小
         /// </summary>
-        private uint GetRemoteFileSize(string url)
+        private long GetRemoteFileSize(string url)
         {
             HttpWebRequest request = null;
             WebResponse response = null;
-            uint length = 0;
+            long length = 0;
             try
             {
                 request = WebRequest.Create(url) as HttpWebRequest;
                 request.Timeout = TimeOut;
                 request.ReadWriteTimeout = ReadWriteTimeout;
-                request.Method = "HEAD";
                 response = request.GetResponse();
-                length = (uint)response.ContentLength;
+                length = response.ContentLength;
             }
             catch (Exception ex)
             {
@@ -517,10 +527,8 @@ namespace NCore.Networking
             }
             finally
             {
-                request?.Abort();
-                response?.Close();
-                request = null;
-                response = null;
+                request?.Abort(); request = null;
+                response?.Close(); response = null;
             }
             return length;
         }
@@ -532,7 +540,7 @@ namespace NCore.Networking
             string realMD5 = MD5Helper.GetFileMD5(Unit.SavePath);
             if (realMD5 != Unit.MD5)
             {
-                System.IO.File.Delete(Unit.SavePath);
+                File.Delete(Unit.SavePath);
                 State = DownloadFileState.Error;
                 Error = $"Check File MD5 Error: {Unit.Name}";
                 return false;
@@ -544,7 +552,7 @@ namespace NCore.Networking
         {
             if (Unit.Size <= 0)
             {
-                Unit.Size = GetRemoteFileSize(Unit.DownloadUrl);
+                Unit.Size = (ulong)GetRemoteFileSize(Unit.DownloadUrl);
                 if (Unit.Size == 0) return false;
             }
 

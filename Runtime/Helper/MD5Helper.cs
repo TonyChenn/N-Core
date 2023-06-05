@@ -1,42 +1,16 @@
 ﻿using NCore;
 using System.Collections.Generic;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using UnityEngine;
 
 
 public static class MD5Helper
 {
-    private static MD5 md5 = null;
-    private static StringBuilder builder = null;
-
-    private static MD5 Md5
-    {
-        get
-        {
-            if (md5 == null)
-                md5 = MD5.Create();
-            return md5;
-        }
-    }
-    private static StringBuilder Builder
-    {
-        get
-        {
-            if (builder == null)
-                builder = new StringBuilder();
-            return builder;
-        }
-    }
-
     #region 计算Hash API
     /// <summary>
     /// 计算字符串的MD5值
     /// </summary>
     public static string GetStrMD5(string source)
     {
-        byte[] buffer = Encoding.UTF8.GetBytes(source);
+        byte[] buffer = System.Text.Encoding.UTF8.GetBytes(source);
         return ComputeHash(buffer);
     }
 
@@ -52,12 +26,12 @@ public static class MD5Helper
     /// <summary>
     /// 计算多个文件的MD5值
     /// </summary>
-    public static string GetFilesMD5(string[] assetPathArray)
+    public static string GetFilesMD5(string[] assetPath)
     {
         List<byte> list = new List<byte>();
-        foreach (string assetPath in assetPathArray)
+        foreach (string item in assetPath)
         {
-            byte[] buffer = ReadFileBytes(assetPath);
+            byte[] buffer = ReadFileBytes(item);
             if (buffer != null)
                 list.AddRange(buffer);
         }
@@ -69,12 +43,10 @@ public static class MD5Helper
         if (buffer == null || buffer.Length < 1) return null;
 
         var builder = StringBuilderPool.Alloc();
-        byte[] hash = Md5.ComputeHash(buffer);
+        byte[] hash = System.Security.Cryptography.MD5.Create().ComputeHash(buffer);
         foreach (var b in hash)
         {
-            string temp = b.ToString("x2");
-            builder.Append(temp);
-
+            builder.Append(b.ToString("x2"));
         }
 
         string result = builder.ToString();
@@ -86,12 +58,8 @@ public static class MD5Helper
 
     static byte[] ReadFileBytes(string filePath)
     {
-        if (!File.Exists(filePath)) return null;
+        if (!System.IO.File.Exists(filePath)) return null;
 
-        List<byte> list = new List<byte>();
-        byte[] data = File.ReadAllBytes(filePath);
-        list.AddRange(data);
-
-        return list.ToArray();
+        return System.IO.File.ReadAllBytes(filePath);
     }
 }
