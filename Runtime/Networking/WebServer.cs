@@ -9,6 +9,8 @@ namespace NCore.Networking
     /// <summary>
     /// 用作http请求,小文件下载
     /// </summary>
+    [APIInfo("N-Core", "WebServer",@"
+对UnityWebRequest的简单封装。适用于小文件的POST/GET/PUT 下载，支持async/await")]
     public static class WebServer
     {
         #region Get Data
@@ -24,9 +26,7 @@ namespace NCore.Networking
             //    url = ChannelConfig.Singleton.CurChannel.ServerURL + url;
 
             UnityWebRequest request = UnityWebRequest.Get(url);
-            Log.Info("版控开始下载：" + url);
             await request.SendWebRequest();
-            Log.Info("版控下载完成：" + url);
             if (request.result != UnityWebRequest.Result.Success)
                 Debug.LogError($"[WebServer] fail to get ---- {url}");
 

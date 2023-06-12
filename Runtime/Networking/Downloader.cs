@@ -10,6 +10,42 @@ using UnityEngine;
 
 namespace NCore.Networking
 {
+    [APIInfo("N-Core", "Downloader", @"
+> 基于HttpWebRequest的多线程断点续传下载器。使用比DownloadFileRange更加复杂，但功能更强大。
+> 适用于多文件/大文件多线程断点续传下载
+# 主要API
+```
+// 下载接口
+void DownloadSync(DownloadUnit unit);   // 同步
+void DownLoadAsync(DownloadUnit unit);   // 异步
+
+// 添加/移除下载单元
+void AddDownload(DownloadUnit downloadUnit);
+void DeleteDownload(DownloadUnit unit);
+void ClearAllDownload();
+```
+# 使用方式：
+```csharp
+// 清理下载器
+Downloader.Singleton.ClearAllDownload();
+
+// 添加下载文件
+for (int i = 0, iMax = modifyList.Count; i < iMax; i++)
+{
+    // 创建下载单元
+    DownloadUnit unit = new DownloadUnit(bundleName, url, savePath, bundleMd5);
+    // 添加下载失败回调
+    unit.ErrorFun = (msg) =>{};
+    // 下载过程回调
+    unit.ProgressFun = (curSize, totalSize) =>{};
+    // 下载结束回调
+    unit.CompleteFun = () =>{};
+    
+    // 开始异步下载
+    Downloader.Singleton.DownLoadAsync(unit);
+}
+```
+")]
     public class Downloader : MonoBehaviour
     {
         private static object _lock = new object();     // 线程锁

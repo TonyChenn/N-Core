@@ -10,6 +10,14 @@ namespace NCore
         void InitSingleton();
     }
 
+    [APIInfo("N-Core", "Singleton", @"
+适用于Unity的单例模式,包含：
+- NormalSingleton
+用于非继承Monobehavior的类继承使用。
+
+- MonoSinglton
+用于继承了Monobehavior的脚本使用，创建一个唯一实例公全局使用。
+")]
     public abstract class NormalSingleton<T> : ISingleton
         where T : NormalSingleton<T>
     {
@@ -94,7 +102,7 @@ namespace NCore
             }
         }
 
-        public static T CreateMonoSingleton<T>() where T : MonoBehaviour, ISingleton
+        public static T CreateMonoSingleton<T>() where T : MonoBehaviour
         {
             T _instence = UObject.FindObjectOfType(typeof(T)) as T;
             if (_instence != null)
@@ -105,7 +113,6 @@ namespace NCore
             _instence = obj.AddComponent<T>();
             UObject.DontDestroyOnLoad(obj);
 
-            _instence.InitSingleton();
             return _instence;
         }
     }
@@ -113,7 +120,7 @@ namespace NCore
     /// <summary>
     /// MonoSinglton
     /// </summary>
-    public abstract class MonoSinglton<T> : MonoBehaviour where T : MonoBehaviour, ISingleton
+    public abstract class MonoSinglton<T> : MonoBehaviour where T : MonoBehaviour
     {
         static T _instance = null;
 

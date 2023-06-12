@@ -8,7 +8,32 @@ namespace NCore.Networking
     /// Unity2018+
     /// 断点续传下载(用于大文件下载)
     /// </summary>
-    [Obsolete("UnityWebRequest为协程实现，请使用 DownloadFile 代替")]
+    [APIInfo("N-Core", "DownloadFileRange", @"
+基于UnityWebRequest的断点续传下载支持,使用简单，适合大文件下载。
+# 主要接口：
+```csharp
+// 开始下载事件
+public event System.Action StartDownloadEvent;
+// 下载过程事件(文件总大小, 已下载大小,下载速度)
+public event System.Action<ulong, ulong, float> OnDownloadEvent;
+public event System.Action DownloadCompleteEvent;  
+```
+# 使用方法：
+```csharp
+using (UnityWebRequest request = new UnityWebRequest(""https://xxx/yyy.apk"", UnityWebRequest.kHttpVerbGET))
+{
+    var downloadHandler = new DownloadFileRange(Application.persistentDataPath + ""/base.apk"", request);
+    downloadHandler.OnDownloadEvent += OnRefreshProgress;
+    request.downloadHandler = downloadHandler;
+    await request.SendWebRequest();
+
+    if (request.result != UnityWebRequest.Result.Success)
+        Debug.LogError(""下载失败"");
+    else
+        Debug.Log(""下载成功"");
+    downloadHandler.OnDispose();
+}
+```")]
     public class DownloadFileRange : DownloadHandlerScript
     {
         private ulong m_TotalFileSize = 0;               // 文件总大小
