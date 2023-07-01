@@ -22,9 +22,6 @@ namespace NCore.Networking
         /// <returns></returns>
         public static async Task<UnityWebRequest> Get(string url)
         {
-            //if (!url.StartsWith("http"))
-            //    url = ChannelConfig.Singleton.CurChannel.ServerURL + url;
-
             UnityWebRequest request = UnityWebRequest.Get(url);
             await request.SendWebRequest();
             if (request.result != UnityWebRequest.Result.Success)

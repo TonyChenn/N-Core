@@ -2,7 +2,8 @@
     "name": "N-Core",
     "rootNamespace": "",
     "references": [
-        "GUID:f66424d0bbc2ec04c996bcc76cf36e6d"
+        "GUID:f66424d0bbc2ec04c996bcc76cf36e6d",
+        "GUID:44867461c7558094cab94edbb05214d9"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

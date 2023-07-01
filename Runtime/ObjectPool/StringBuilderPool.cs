@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -14,14 +14,13 @@ namespace NCore
             return dataStack.Count > 0 ? dataStack.Pop() : new StringBuilder();
         }
 
-        public static bool Recycle(StringBuilder builder)
+        public static void Recycle(StringBuilder builder)
         {
             builder.Remove(0, builder.Length);
             if (dataStack.Count <= MaxCount)
                 dataStack.Push(builder);
             else
                 builder = null;
-            return true;
         }
     }
 

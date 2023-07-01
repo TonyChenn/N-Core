@@ -1,4 +1,4 @@
-﻿using NCore;
+using NCore;
 using System.Collections.Generic;
 
 

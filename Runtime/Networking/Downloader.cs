@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -225,7 +225,7 @@ for (int i = 0, iMax = modifyList.Count; i < iMax; i++)
                 }
                 else
                 {
-                    Log.Error($"Downloader: Download error State: {mac.State}\t\t{mac.Unit.Name}\t\t{mac.TryCount}");
+                    Log.Error($"Downloader: Download error State: {mac.State}\t\t{mac.Error}\t\t{mac.Unit.Name}\t\t{mac.TryCount}");
                     break;
                 }
             }
