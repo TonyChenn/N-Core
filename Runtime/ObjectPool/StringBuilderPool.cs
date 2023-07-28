@@ -4,34 +4,33 @@ using System.Text;
 
 namespace NCore
 {
-    public class StringBuilderPool
-    {
-        private static int MaxCount = 31;
-        static Stack<StringBuilder> dataStack = new Stack<StringBuilder>(16);
+	public class StringBuilderPool
+	{
+		private static readonly DefaultObjectPool<StringBuilder> pool = new((_builder) =>
+		{
+			_builder.Remove(0, _builder.Length);
+		}, 16);
 
-        public static StringBuilder Alloc()
-        {
-            return dataStack.Count > 0 ? dataStack.Pop() : new StringBuilder();
-        }
+		private static int MaxCount = 32;
 
-        public static void Recycle(StringBuilder builder)
-        {
-            builder.Remove(0, builder.Length);
-            if (dataStack.Count <= MaxCount)
-                dataStack.Push(builder);
-            else
-                builder = null;
-        }
-    }
+		public static StringBuilder Alloc() => pool.Alloc();
 
-    /// <summary>
-    /// StringBuilder 静态拓展
-    /// </summary>
-    public static class StringBuilderExtention
-    {
-        public static void Recycle(this StringBuilder builder)
-        {
-            StringBuilderPool.Recycle(builder);
-        }
-    }
+		public static void Recycle(StringBuilder builder)
+		{
+			if (builder == null) return;
+			if (pool.Count >= MaxCount) { builder = null; return; }
+			pool.Recycle(builder);
+		}
+	}
+
+	/// <summary>
+	/// StringBuilder 静态拓展
+	/// </summary>
+	public static class StringBuilderExtention
+	{
+		public static void Recycle(this StringBuilder builder)
+		{
+			StringBuilderPool.Recycle(builder);
+		}
+	}
 }

@@ -9,15 +9,9 @@ namespace NCore
     {
         private static readonly DefaultObjectPool<List<T>> _pool = new DefaultObjectPool<List<T>>((item) => item.Clear());
 
-        public static List<T> Alloc()
-        {
-            return _pool.Alloc();
-        }
+		public static List<T> Alloc() => _pool.Alloc();
 
-        public static void Recycle(List<T> item)
-        {
-            _pool.Recycle(item);
-        }
+		public static void Recycle(List<T> item) => _pool.Recycle(item);
     }
 
     public static class ListPoolExtention
