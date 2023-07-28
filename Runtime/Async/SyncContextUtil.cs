@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using UnityEngine;
 
@@ -6,41 +6,48 @@ namespace NCore
 {
     public static class SyncContextUtil
     {
-        #region API
+		// 该属性：使该方法再Awake之前执行
+		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+		private static void Initalize()
+		{
+			UnitySynchronizationContext = SynchronizationContext.Current;
+			UnityThreadId = Thread.CurrentThread.ManagedThreadId;
+		}
+		/// <summary>
+		/// Unity线程ID
+		/// </summary>
+		public static int UnityThreadId { get; private set; }
 
-        /// <summary>
-        /// 委托抛到Unity线程运行
-        /// </summary>
-        public static void RunOnUnityScheduler(Action action)
+		/// <summary>
+		///Unity同步上下文
+		/// </summary>
+		public static SynchronizationContext UnitySynchronizationContext { get; private set; }
+
+
+		#region API
+		/// <summary>
+		/// 委托抛到Unity线程运行(Post 异步)
+		/// </summary>
+		public static void PostToUnityThread(Action action)
         {
-            if (SynchronizationContext.Current == UnitySynchronizationContext)
-            {
-                action();
-            }
-            else
-            {
-                UnitySynchronizationContext.Post(_ => action(), null);
-            }
-        }
+			UnitySynchronizationContext.Post(_ => action(), null);
+		}
+		/// <summary>
+		/// 委托抛到Unity线程运行(Send 同步)
+		/// </summary>
+		public static void SendToUnityThread(Action action)
+		{
+			if (SynchronizationContext.Current == UnitySynchronizationContext)
+			{
+				action();
+			}
+			else
+			{
+				UnitySynchronizationContext.Send(_ => action(), null);
+			}
+		}
+		#endregion
 
-        #endregion
 
-        // 该属性：使该方法再Awake之前执行
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        private static void Install()
-        {
-            UnitySynchronizationContext = SynchronizationContext.Current;
-            UnityThreadId = Thread.CurrentThread.ManagedThreadId;
-        }
-
-        /// <summary>
-        /// Unity线程ID
-        /// </summary>
-        private static int UnityThreadId { get; set; }
-
-        /// <summary>
-        /// 啥意思？（作用是将一个线程的代码到另一个线程来执行）
-        /// </summary>
-        private static SynchronizationContext UnitySynchronizationContext { get; set; }
-    }
+	}
 }

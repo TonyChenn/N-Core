@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -67,7 +67,7 @@ namespace NCore
         public static SimpleCoroutineAwaiter<UnityEngine.Object> GetAwaiter(this ResourceRequest instruction)
         {
             var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     InstructionWrappers.ResourceRequest(awaiter, instruction));
@@ -85,7 +85,7 @@ namespace NCore
         public static SimpleCoroutineAwaiter<AssetBundle> GetAwaiter(this AssetBundleCreateRequest instruction)
         {
             var awaiter = new SimpleCoroutineAwaiter<AssetBundle>();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     InstructionWrappers.AssetBundleCreateRequest(awaiter, instruction));
@@ -96,7 +96,7 @@ namespace NCore
         public static SimpleCoroutineAwaiter<UnityEngine.Object> GetAwaiter(this AssetBundleRequest instruction)
         {
             var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     InstructionWrappers.AssetBundleRequest(awaiter, instruction));
@@ -107,7 +107,7 @@ namespace NCore
         public static SimpleCoroutineAwaiter<T> GetAwaiter<T>(this IEnumerator<T> coroutine)
         {
             var awaiter = new SimpleCoroutineAwaiter<T>();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     new CoroutineWrapper<T>(coroutine, awaiter).Run());
@@ -118,7 +118,7 @@ namespace NCore
         public static SimpleCoroutineAwaiter<object> GetAwaiter(this IEnumerator coroutine)
         {
             var awaiter = new SimpleCoroutineAwaiter<object>();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     new CoroutineWrapper<object>(coroutine, awaiter).Run());
@@ -132,7 +132,7 @@ namespace NCore
         private static SimpleCoroutineAwaiter GetAwaiterReturnVoid(object instruction)
         {
             var awaiter = new SimpleCoroutineAwaiter();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     InstructionWrappers.ReturnVoid(awaiter, instruction));
@@ -142,7 +142,7 @@ namespace NCore
         private static SimpleCoroutineAwaiter<T> GetAwaiterReturnSelf<T>(T instruction)
         {
             var awaiter = new SimpleCoroutineAwaiter<T>();
-            SyncContextUtil.RunOnUnityScheduler(() =>
+            SyncContextUtil.PostToUnityThread(() =>
             {
                 AsyncCoroutine.Singlton.StartCoroutine(
                     InstructionWrappers.ReturnSelf(awaiter, instruction));
@@ -194,7 +194,7 @@ namespace NCore
                 // instructions
                 if (_continuation != null)
                 {
-                    SyncContextUtil.RunOnUnityScheduler(_continuation);
+                    SyncContextUtil.PostToUnityThread(_continuation);
                 }
             }
 
@@ -239,7 +239,7 @@ namespace NCore
                 // instructions
                 if (_continuation != null)
                 {
-                    SyncContextUtil.RunOnUnityScheduler(_continuation);
+                    SyncContextUtil.PostToUnityThread(_continuation);
                 }
             }
 
