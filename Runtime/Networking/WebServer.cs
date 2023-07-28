@@ -10,7 +10,7 @@ namespace NCore.Networking
     /// 用作http请求,小文件下载
     /// </summary>
     [APIInfo("N-Core", "WebServer",@"
-对UnityWebRequest的简单封装。适用于小文件的POST/GET/PUT 下载，支持async/await")]
+对UnityWebRequest的简单封装。适用于小文件的POST/GET/PUT 下载，支持async/await。没有进度提示。")]
     public static class WebServer
     {
         #region Get Data

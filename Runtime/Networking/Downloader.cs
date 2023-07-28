@@ -14,7 +14,7 @@ namespace NCore.Networking
 > 基于HttpWebRequest的多线程断点续传下载器。使用比DownloadFileRange更加复杂，但功能更强大。
 > 适用于多文件/大文件多线程断点续传下载
 # 主要API
-```
+```csharp
 // 下载接口
 void DownloadSync(DownloadUnit unit);   // 同步
 void DownLoadAsync(DownloadUnit unit);   // 异步
@@ -225,7 +225,8 @@ for (int i = 0, iMax = modifyList.Count; i < iMax; i++)
                 }
                 else
                 {
-                    Log.Error($"Downloader: Download error State: {mac.State}\t\t{mac.Error}\t\t{mac.Unit.Name}\t\t{mac.TryCount}");
+                    Log.Error($"Downloader: Download error State: {mac.State}\t\t{mac.Unit.Name}\t\t{mac.TryCount}");
+					Log.Error($"错误原因：{mac.Error}");
                     break;
                 }
             }
@@ -432,9 +433,17 @@ for (int i = 0, iMax = modifyList.Count; i < iMax; i++)
             string tmpFile = $"{Unit.SavePath}.tmp";
             FileStream fs = null;
             if (File.Exists(Unit.SavePath))
-            {
-                CurSize = Unit.Size;
-                return true;
+			{
+				string realMD5 = MD5Helper.GetFileMD5(Unit.SavePath);
+				if (realMD5 == Unit.MD5)
+				{
+					CurSize = Unit.Size;
+					return true;
+				}
+				else
+				{
+					File.Delete(Unit.SavePath);
+				}
             }
             else if (File.Exists(tmpFile))
             {
@@ -578,7 +587,7 @@ for (int i = 0, iMax = modifyList.Count; i < iMax; i++)
             {
                 File.Delete(Unit.SavePath);
                 State = DownloadFileState.Error;
-                Error = $"Check File MD5 Error: {Unit.Name}";
+                Error = $"Check File MD5 Error:{Unit.Name}\t{realMD5}\t{Unit.MD5}";
                 return false;
             }
             return true;
