@@ -2,8 +2,9 @@
     "name": "N-Core.Editor",
     "rootNamespace": "",
     "references": [
+        "N-Package",
         "N-Core",
-        "N-Package"
+        "N-Package.Editor"
     ],
     "includePlatforms": [
         "Editor"
