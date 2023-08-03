@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 namespace NCore
 {
-    public class AsyncCoroutine : MonoSinglton<AsyncCoroutine>, ISingleton
+    public class AsyncCoroutine : MonoSinglton<AsyncCoroutine>
     {
-        public void InitSingleton()
-        {
-            gameObject.name = "[AsyncCoroutine]";
-        }
+		private void Awake()
+		{
+			gameObject.name = "[AsyncCoroutine]";
+		}
     }
 }
