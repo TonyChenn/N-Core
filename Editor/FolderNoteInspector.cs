@@ -1,56 +1,51 @@
-﻿using UnityEditor;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 
-namespace NCore.Editor
+internal class Note
 {
-    public class Note
-    {
-        AssetImporter assetImporter;
+	AssetImporter assetImporter;
 
-        public string guid;
-        public string info;
+	public string guid;
+	public string info;
 
-        public Note(string path)
-        {
-            assetImporter = AssetImporter.GetAtPath(path);
-            guid = AssetDatabase.AssetPathToGUID(path);
-            info = assetImporter.userData;
-        }
+	public Note(string path)
+	{
+		assetImporter = AssetImporter.GetAtPath(path);
+		guid = AssetDatabase.AssetPathToGUID(path);
+		info = assetImporter.userData;
+	}
 
-        public void Save()
-        {
-            assetImporter.userData = info;
-            assetImporter.SaveAndReimport();
-        }
-    }
-
-    [CustomEditor(typeof(DefaultAsset))]
-    public class FolderNoteInspector : UnityEditor.Editor
-    {
-        Note note;
-        GUILayoutOption[] options = new GUILayoutOption[] { GUILayout.Height(100) };
-        public override void OnInspectorGUI()
-        {
-            string path = AssetDatabase.GetAssetPath(Selection.activeInstanceID);
-            if (AssetDatabase.IsValidFolder(path))
-                drawInspector(path);
-
-            base.OnInspectorGUI();
-        }
-
-        void drawInspector(string path)
-        {
-            if (note == null) note = new Note(path);
-
-            GUI.enabled = true;
-            EditorGUILayout.LabelField("注释");
-            note.info = EditorGUILayout.TextArea(note.info, options);
-
-            if(GUILayout.Button("保存"))
-            {
-                note.Save();
-            }
-        }
-    }
+	public void Save()
+	{
+		assetImporter.userData = info;
+		assetImporter.SaveAndReimport();
+	}
 }
 
+public class FolderNoteInspector : ICustomDefaultAssetInspector
+{
+	Note note;
+	GUILayoutOption[] options = new GUILayoutOption[] { GUILayout.Height(100) };
+
+	public bool CanDraw(string path)
+	{
+		return Directory.Exists(path);
+	}
+	public void Draw(string path)
+	{
+		if (AssetDatabase.IsValidFolder(path))
+		{
+			if (note == null) note = new Note(path);
+
+			GUI.enabled = true;
+			EditorGUILayout.LabelField("注释");
+			note.info = EditorGUILayout.TextArea(note.info, options);
+
+			if (GUILayout.Button("保存"))
+			{
+				note.Save();
+			}
+		}
+	}
+}
