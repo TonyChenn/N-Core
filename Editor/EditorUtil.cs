@@ -1,4 +1,4 @@
-using System;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -10,6 +10,17 @@ public class EditorUtil
 	private static void OpenStreammingAssetFolder() { OpenFolder(Application.streamingAssetsPath); }
 	[MenuItem("Tools/Open../可读写目录")]
 	private static void OpenPersistentFolder() { OpenFolder(Application.persistentDataPath); }
+
+	[MenuItem("Tools/清理可读写目录")]
+	private static void ClearPersistentFolder()
+	{
+
+		if (Directory.Exists(Application.persistentDataPath))
+		{
+			Directory.Delete(Application.persistentDataPath, true);
+		}
+		Directory.CreateDirectory(Application.persistentDataPath);
+	}
 
 
 	/// <summary>
@@ -48,7 +59,7 @@ public class EditorUtil
 	/// <summary>
 	/// 返回一个看起来像深色棋盘的可用纹理。
 	/// </summary>
-	public static Texture2D backdropTexture
+	public static Texture2D BackdropTexture
 	{
 		get
 		{

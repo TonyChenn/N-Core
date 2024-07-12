@@ -69,7 +69,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     InstructionWrappers.ResourceRequest(awaiter, instruction));
             });
             return awaiter;
@@ -87,7 +87,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter<AssetBundle>();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     InstructionWrappers.AssetBundleCreateRequest(awaiter, instruction));
             });
             return awaiter;
@@ -98,7 +98,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter<UnityEngine.Object>();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     InstructionWrappers.AssetBundleRequest(awaiter, instruction));
             });
             return awaiter;
@@ -109,7 +109,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter<T>();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     new CoroutineWrapper<T>(coroutine, awaiter).Run());
             });
             return awaiter;
@@ -120,7 +120,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter<object>();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     new CoroutineWrapper<object>(coroutine, awaiter).Run());
             });
             return awaiter;
@@ -134,7 +134,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     InstructionWrappers.ReturnVoid(awaiter, instruction));
             });
             return awaiter;
@@ -144,7 +144,7 @@ namespace NCore
             var awaiter = new SimpleCoroutineAwaiter<T>();
             SyncContextUtil.PostToUnityThread(() =>
             {
-                AsyncCoroutine.Singlton.StartCoroutine(
+                AsyncCoroutine.Singleton.StartCoroutine(
                     InstructionWrappers.ReturnSelf(awaiter, instruction));
             });
             return awaiter;
@@ -259,8 +259,7 @@ namespace NCore
             readonly SimpleCoroutineAwaiter<T> _awaiter;
             readonly Stack<IEnumerator> _processStack;
 
-            public CoroutineWrapper(
-                IEnumerator coroutine, SimpleCoroutineAwaiter<T> awaiter)
+            public CoroutineWrapper(IEnumerator coroutine, SimpleCoroutineAwaiter<T> awaiter)
             {
                 _processStack = new Stack<IEnumerator>();
                 _processStack.Push(coroutine);
@@ -420,5 +419,5 @@ namespace NCore
                 awaiter.Complete(instruction.asset, null);
             }
         }
-    }
+	}
 }

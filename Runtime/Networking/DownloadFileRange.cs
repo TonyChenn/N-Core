@@ -1,3 +1,4 @@
+using NDebug;
 using System;
 using System.IO;
 using UnityEngine.Networking;
@@ -100,7 +101,7 @@ using (UnityWebRequest request = new UnityWebRequest(""https://xxx/yyy.apk"", Un
         {
             if (data == null || dataLength == 0 || m_WebRequest.responseCode >= 400)
             {
-                UnityEngine.Debug.Log("[DownloadFileRange error] ReceiveData return false");
+				Log.Info("[DownloadFileRange error] ReceiveData return false");
                 return false;
             }
             m_Fs.Write(data, 0, dataLength);
@@ -117,7 +118,7 @@ using (UnityWebRequest request = new UnityWebRequest(""https://xxx/yyy.apk"", Un
         protected override void ReceiveContentLengthHeader(ulong contentLength)
         {
             string content_length = m_WebRequest.GetResponseHeader("Content-Length");
-            UnityEngine.Debug.Log(content_length);
+			Log.Info(content_length);
             if (!string.IsNullOrEmpty(content_length))
             {
                 try
@@ -126,7 +127,7 @@ using (UnityWebRequest request = new UnityWebRequest(""https://xxx/yyy.apk"", Un
                 }
                 catch (System.Exception e)
                 {
-                    UnityEngine.Debug.Log("获取文件长度失败:" + e.Message);
+					Log.Info("获取文件长度失败:" + e.Message);
                     m_TotalFileSize = contentLength;
                 }
             }

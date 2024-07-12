@@ -98,6 +98,11 @@ namespace NCore
 			return trans;
 		}
 
+		public static void Destory(this Transform trans)
+		{
+			GameObject.Destroy(trans.gameObject);
+		}
+
 		/// <summary>
 		/// 获取Compoment,如果不存在就添加
 		/// </summary>

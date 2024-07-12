@@ -26,14 +26,43 @@ namespace NCore
             return result;
         }
 
-        #endregion
-        #region 路径相关
+		/// <summary>
+		/// 代替string.StartsWith，减少内存分配
+		/// https://docs.unity3d.com/cn/2022.3/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
+		/// </summary>
+		public static bool CustomStartsWith(this string str, string value)
+		{
+			int aLen = str.Length;
+			int bLen = value.Length;
 
-        /// <summary>
-        /// 路径标准化
-        /// </summary>
-        /// 将路径中"\\" 转换为"/",去除末尾"/"
-        public static string MakeStandardPath(this string path)
+			int ap = 0; int bp = 0;
+
+			while (ap < aLen && bp < bLen && str[ap] == value[bp]) { ap++; bp++; }
+
+			return (bp == bLen);
+		}
+
+		/// <summary>
+		/// 代替string.StartsWith，减少内存分配
+		/// https://docs.unity3d.com/cn/2022.3/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
+		/// </summary>
+		public static bool CustomEndsWith(this string str, string value)
+		{
+			int ap = str.Length - 1;
+			int bp = value.Length - 1;
+			while (ap >= 0 && bp >= 0 && str[ap] == value[bp]) { ap--; bp--; }
+
+			return (bp < 0);
+		}
+
+		#endregion
+		#region 路径相关
+
+		/// <summary>
+		/// 路径标准化
+		/// </summary>
+		/// 将路径中"\\" 转换为"/",去除末尾"/"
+		public static string MakeStandardPath(this string path)
         {
             return path.Replace("\\", "/").TrimEnd('/');
         }

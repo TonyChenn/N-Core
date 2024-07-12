@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -46,23 +47,13 @@ namespace NCore
         }
 
         /// <summary>
-        /// JsonNode
-        /// </summary>
-        /// <returns></returns>
-        public static JSONNode GetJsonNode(this UnityWebRequest request)
-        {
-            string json = request.GetTxt();
-            return JSON.Parse(json);
-        }
-
-        /// <summary>
         /// 把下载的文件保存到本地
         /// </summary>
         /// <param name="request"></param>
         /// <param name="path"></param>
         public static void SaveFile(this UnityWebRequest request, string path)
         {
-            using (System.IO.MemoryStream memory = new System.IO.MemoryStream(request.GetBytes()))
+            using (System.IO.MemoryStream memory = new(request.GetBytes()))
             {
                 if (System.IO.File.Exists(path))
                     System.IO.File.Delete(path);

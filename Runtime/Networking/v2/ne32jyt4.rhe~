@@ -1,0 +1,30 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class NewDownloader : MonoBehaviour
+{
+	#region static method
+	public static void Add(string url, string savePath)
+	{
+
+	}
+	public static void Add(string url, string savePath, Action callback)
+	{
+
+	}
+
+	public static void Delete()
+	{
+
+	}
+	#endregion
+
+
+	public NewDownloader()
+	{
+
+	}
+
+}

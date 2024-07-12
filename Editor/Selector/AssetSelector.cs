@@ -154,7 +154,7 @@ public class AssetSelector : EditorWindow
 
 					if (Event.current.type == EventType.Repaint)
 					{
-						EditorUtil.DrawTiledTexture(rect, EditorUtil.backdropTexture);
+						EditorUtil.DrawTiledTexture(rect, EditorUtil.BackdropTexture);
 						Rect clipRect = rect;
 
 						if (item is Texture texture)

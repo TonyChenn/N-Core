@@ -22,13 +22,26 @@ namespace NCore.Networking
         /// <returns></returns>
         public static async Task<UnityWebRequest> Get(string url)
         {
+			Log.Info($"[WebServer] get --- {url}");
             UnityWebRequest request = UnityWebRequest.Get(url);
             await request.SendWebRequest();
             if (request.result != UnityWebRequest.Result.Success)
-                Debug.LogError($"[WebServer] fail to get ---- {url}");
+			{
+                Log.Error($"[WebServer] fail to get ---- {url}");
+			}
 
             return request;
         }
+		public static async Task<UnityWebRequest> GetTexture(string url)
+		{
+			var request = UnityWebRequestTexture.GetTexture(url);
+			await request.SendWebRequest();
+			if (request.result != UnityWebRequest.Result.Success)
+			{
+				Log.Error($"[WebServer] fail to get texture ---- {url}");
+			}
+			return request;
+		}
         #endregion
 
         #region Post Data
@@ -46,7 +59,7 @@ namespace NCore.Networking
             await request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
-                Debug.LogError($"[WebServer] fail to post ---- {url}");
+				Log.Error($"[WebServer] fail to post ---- {url}");
 
             return request;
         }
@@ -64,80 +77,10 @@ namespace NCore.Networking
             await request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
-                Debug.LogError($"[WebServer] fail to put ---- {url}");
+				Log.Error($"[WebServer] fail to put ---- {url}");
 
             return request;
         }
         #endregion
     }
 }
-
-
-/// <summary>
-/// UNITY_2017_1以前的使用此方法
-/// </summary>
-
-/*
-public class WebServer : MonoSinglton<WebServer>, ISingleton
-{
-    public void InitSingleton()
-    {
-        Singlton.gameObject.name = "[WebServer]";
-    }
-    #region Get Data
-
-    public void Get(string url, Action<UnityWebRequest> result)
-    {
-        StartCoroutine(GetData(url, result));
-    }
-
-    IEnumerator GetData(string url, Action<UnityWebRequest> result)
-    {
-        UnityWebRequest request = UnityWebRequest.Get(url);
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.ProtocolError
-            || request.result == UnityWebRequest.Result.ConnectionError)
-        {
-            string info = string.Format($"Get error: {request.error}, url: {url}");
-            Debug.Log(info);
-        }
-        else
-        {
-            if (result != null) result(request);
-        }
-    }
-
-    #endregion
-
-
-    #region Post Data
-    public void Post(string url, Hashtable data, byte[] file, Action<UnityWebRequest> result)
-    {
-        WWWForm form = new WWWForm();
-        foreach (string key in data)
-            form.AddField(key, data[key].ToString());
-
-        if (file != null)
-            form.AddBinaryData("file", file);
-
-        StartCoroutine(PostData(url, form, result));
-    }
-
-    IEnumerator PostData(string url, WWWForm form, Action<UnityWebRequest> result)
-    {
-        var request = UnityWebRequest.Post(url, form);
-        yield return request.SendWebRequest();
-
-        if (request.result == UnityWebRequest.Result.ProtocolError
-            || request.result == UnityWebRequest.Result.ConnectionError)
-            Debug.Log(string.Format("Post error: {0}, url: {1}", request.error, url));
-        else
-        {
-            if (result != null) result(request);
-        }
-    }
-
-    #endregion
-}
-*/
