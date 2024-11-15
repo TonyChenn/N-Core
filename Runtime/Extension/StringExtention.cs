@@ -30,7 +30,7 @@ namespace NCore
 		/// 代替string.StartsWith，减少内存分配
 		/// https://docs.unity3d.com/cn/2022.3/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
 		/// </summary>
-		public static bool CustomStartsWith(this string str, string value)
+		public static bool StartsWithCustom(this string str, string value)
 		{
 			int aLen = str.Length;
 			int bLen = value.Length;
@@ -46,7 +46,7 @@ namespace NCore
 		/// 代替string.StartsWith，减少内存分配
 		/// https://docs.unity3d.com/cn/2022.3/Manual/BestPracticeUnderstandingPerformanceInUnity5.html
 		/// </summary>
-		public static bool CustomEndsWith(this string str, string value)
+		public static bool EndsWithCustom(this string str, string value)
 		{
 			int ap = str.Length - 1;
 			int bp = value.Length - 1;

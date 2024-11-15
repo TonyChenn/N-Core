@@ -1,4 +1,3 @@
-using NDebug;
 using System.Collections;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -22,12 +21,12 @@ namespace NCore.Networking
         /// <returns></returns>
         public static async Task<UnityWebRequest> Get(string url)
         {
-			Log.Info($"[WebServer] get --- {url}");
+			UpdateLog.Info($"[WebServer] get --- {url}");
             UnityWebRequest request = UnityWebRequest.Get(url);
             await request.SendWebRequest();
             if (request.result != UnityWebRequest.Result.Success)
 			{
-                Log.Error($"[WebServer] fail to get ---- {url}");
+                UpdateLog.Error($"[WebServer] fail to get ---- {url}");
 			}
 
             return request;
@@ -38,7 +37,7 @@ namespace NCore.Networking
 			await request.SendWebRequest();
 			if (request.result != UnityWebRequest.Result.Success)
 			{
-				Log.Error($"[WebServer] fail to get texture ---- {url}");
+				UpdateLog.Error($"[WebServer] fail to get texture ---- {url}");
 			}
 			return request;
 		}
@@ -59,7 +58,7 @@ namespace NCore.Networking
             await request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
-				Log.Error($"[WebServer] fail to post ---- {url}");
+				UpdateLog.Error($"[WebServer] fail to post ---- {url}");
 
             return request;
         }
@@ -77,7 +76,7 @@ namespace NCore.Networking
             await request.SendWebRequest();
 
             if (request.result != UnityWebRequest.Result.Success)
-				Log.Error($"[WebServer] fail to put ---- {url}");
+				UpdateLog.Error($"[WebServer] fail to put ---- {url}");
 
             return request;
         }
